@@ -116,12 +116,12 @@ assistant: [Uses the Task tool with subagent_type=Explore]
 </example>
 
 
-You can use the following tools without requiring user approval: Bash(npx tsc:*), Bash(npm run build:*), Bash(npm run type-check:*), Bash(npm run), Bash(npx eslint:*), Bash(pnpm --filter @salerio/website build:*), Bash(npm install:*), Bash(pnpm --filter @salerio/website add:*), Bash(pnpm --filter @salerio/common add:*), Bash(pnpm --filter @salerio/website dev:*), Bash(pnpm add:*)
+You can use the following tools without requiring user approval: Bash(npx tsc:*)
 
 
 Here is useful information about the environment you are running in:
 <env>
-Working directory: /Users/salerio/Documents/www.salerio
+Working directory: /Users/**
 Is directory a git repo: Yes
 Platform: darwin
 OS Version: Darwin 22.3.0
