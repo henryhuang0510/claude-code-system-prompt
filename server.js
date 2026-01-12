@@ -55,6 +55,17 @@ function logRequest({ method, url, headers, body }) {
   }
 }
 
+function logResponse({ status, headers, body }) {
+  const now = new Date().toISOString();
+  const safeHeaders = redactHeaders(headers || {});
+  const safeBody = body ? redactBody(body.toString('utf8')) : '';
+  console.log(`[${now}] Response ${status}`);
+  console.log(`Headers: ${JSON.stringify(safeHeaders)}`);
+  if (safeBody && safeBody.length) {
+    console.log(`Body: ${safeBody}`);
+  }
+}
+
 function buildTargetUrl(pathWithPrefix) {
   const p = pathWithPrefix.startsWith('/anthropic/') ? pathWithPrefix.slice('/anthropic/'.length) : pathWithPrefix;
   const base = BASE_URL.endsWith('/') ? BASE_URL.slice(0, -1) : BASE_URL;
@@ -104,9 +115,20 @@ const server = http.createServer(async (req, res) => {
       response.headers.forEach((v, k) => {
         respHeaders[k] = v;
       });
+
+      // Remove content-length to allow streaming (chunked transfer encoding)
+      delete respHeaders['content-length'];
+
+      logResponse({ status: response.status, headers: respHeaders, body: '[Streaming Response]' });
+
       res.writeHead(response.status, respHeaders);
-      const respBody = Buffer.from(await response.arrayBuffer());
-      res.end(respBody);
+
+      if (response.body) {
+        const { Readable } = require('stream');
+        Readable.fromWeb(response.body).pipe(res);
+      } else {
+        res.end();
+      }
     } catch (e) {
       const status = e.name === 'AbortError' ? 504 : 502;
       res.writeHead(status, { 'content-type': 'application/json' });
